@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuratore Album - Studio </title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Icone -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <!-- Google Fonts -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #00d8e3;
+        }
+
+        /* Nasconde le freccette (spinner) dai campi input numerici */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        /* Stile personalizzato per le checkbox */
+        .custom-checkbox:checked {
+            background-color: #4f46e5; /* Indigo-600 */
+            border-color: #4f46e5;
+        }
+
+        /* Animazione per l'aggiornamento del prezzo */
+        @keyframes popInfo {
+            0% { transform: scale(1); color: #4f46e5; }
+            50% { transform: scale(1.1); color: #10b981; } 
+            100% { transform: scale(1); color: #4f46e5; }
+        }
+        
+        .price-anim {
+            animation: popInfo 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Stili Stampa */
+        @media print {
+            .no-print { display: none !important; }
+            .print-full-width { width: 100% !important; grid-column: span 12 !important; }
+            body { background-color: white; }
+            .shadow-xl, .shadow-lg, .shadow-sm { box-shadow: none !important; border: 1px solid #e2e8f0; }
+            input, select { -webkit-appearance: none; border: none; background: transparent; padding: 0; font-weight: bold; }
+        }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen p-4 md:p-8 flex flex-col justify-between">
+
+    <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 mb-10">
+        
+        <!-- HEADER / SELEZIONE FORNITORE -->
+        <div class="lg:col-span-12 no-print">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Preventivatore Studio AM</h1>
+                    <p class="text-slate-500 text-sm">Presto che è tardi!!</p>
+                </div>
+                <div class="mt-4 md:mt-0 w-full md:w-auto">
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-indigo-500">
+                            <i class="fas fa-industry"></i>
+                        </div>
+                        <select id="supplierSelect" class="block w-full md:w-72 pl-10 pr-10 py-2.5 bg-white border border-slate-200 text-slate-700 font-semibold rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all cursor-pointer hover:border-indigo-300 appearance-none">
+                            <!-- JS carica opzioni -->
+                        </select>
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400">
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- COLONNA SINISTRA: Input e Scelte -->
+        <div class="lg:col-span-8 space-y-6 no-print">
+            
+            <form id="calculatorForm" class="space-y-6">
+                
+                <!-- CARD 1: Struttura -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-50 bg-slate-50/50 flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm"><i class="fas fa-book"></i></div>
+                        <h3 class="font-bold text-slate-800">Struttura & Materiali</h3>
+                    </div>
+                    
+                    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                        <!-- Formato -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Formato Album</label>
+                            <select id="formatSelect" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
+                                <!-- JS -->
+                            </select>
+                        </div>
+
+                        <!-- Interni -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Interni</label>
+                            <select id="internalSelect" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
+                                <!-- JS -->
+                            </select>
+                        </div>
+
+                        <!-- Materiale Copertina -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Copertina</label>
+                            <select id="coverSelect" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
+                                <!-- JS -->
+                            </select>
+                        </div>
+
+                        <!-- Schiena / Dorso -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Schiena / Dorso</label>
+                            <select id="spineSelect" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
+                                <!-- JS -->
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 2: Quantità Pagine -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                     <div class="px-6 py-4 border-b border-slate-50 bg-slate-50/50 flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm"><i class="fas fa-layer-group"></i></div>
+                        <h3 class="font-bold text-slate-800">Impaginazione</h3>
+                    </div>
+
+                    <div class="p-6">
+                        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700">Numero di Fogli (Spreads)</label>
+                                <p class="text-xs text-slate-400 mt-1">1 Foglio = 2 facciate (SX + DX)</p>
+                            </div>
+                            
+                            <!-- Controllo Numerico Custom -->
+                            <div class="flex items-center bg-slate-100 rounded-xl p-1 shadow-inner">
+                                <button type="button" onclick="adjustPages(-1)" class="w-10 h-10 rounded-lg bg-white text-slate-600 hover:text-indigo-600 hover:shadow-md transition-all flex items-center justify-center">
+                                    <i class="fas fa-minus text-xs"></i>
+                                </button>
+                                
+                                <input type="number" id="pageInput" value="30" min="10" max="100" class="w-16 bg-transparent text-center font-bold text-lg text-slate-700 outline-none border-none">
+                                
+                                <button type="button" onclick="adjustPages(1)" class="w-10 h-10 rounded-lg bg-white text-slate-600 hover:text-indigo-600 hover:shadow-md transition-all flex items-center justify-center">
+                                    <i class="fas fa-plus text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 3: Extra -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-50 bg-slate-50/50 flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm"><i class="fas fa-star"></i></div>
+                        <h3 class="font-bold text-slate-800">Accessori & Extra</h3>
+                    </div>
+                    <div class="p-6">
+                        <div id="extrasContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- Checkbox JS -->
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+
+        <!-- COLONNA DESTRA: Riepilogo Sticky -->
+        <div class="lg:col-span-4 print-full-width">
+            <div class="bg-white rounded-2xl shadow-lg border border-slate-200 p-8 sticky top-8 transition-all duration-300">
+                
+                <div class="text-center mb-8">
+                    <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Preventivo</h2>
+                    <div class="inline-block mt-2 px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold uppercase tracking-wide rounded-full" id="selectedSupplierName">
+                        Fornitore
+                    </div>
+                </div>
+
+                <div class="space-y-4 text-sm mb-8">
+                    <!-- Riga Dettaglio -->
+                    <div class="flex justify-between items-center pb-2 border-b border-slate-50">
+                        <span class="text-slate-500">Struttura Base</span>
+                        <span class="font-semibold text-slate-800" id="costFormat">€0</span>
+                    </div>
+                    <div class="flex justify-between items-center pb-2 border-b border-slate-50">
+                        <span class="text-slate-500">Copertina</span>
+                        <span class="font-semibold text-slate-800" id="costCover">€0</span>
+                    </div>
+                    <div class="flex justify-between items-center pb-2 border-b border-slate-50">
+                        <span class="text-slate-500">Schiena</span>
+                        <span class="font-semibold text-slate-800" id="costSpine">€0</span>
+                    </div>
+                    <div class="flex justify-between items-center pb-2 border-b border-slate-50">
+                        <div class="flex flex-col">
+                            <span class="text-slate-500">Interni</span> <!-- Corretto in Interni -->
+                            <span class="text-xs text-slate-400 font-medium"><span id="summaryPages">0</span> fogli</span>
+                        </div>
+                        <span class="font-semibold text-slate-800" id="costInternals">€0</span>
+                    </div>
+                    <div class="flex justify-between items-center pt-2 text-indigo-600/80">
+                        <span class="">Extra</span>
+                        <span class="font-semibold" id="costExtras">€0</span>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 rounded-xl p-6 text-center border border-slate-100 mb-6">
+                    <p class="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">Totale Stimato</p>
+                    <div class="text-4xl font-extrabold text-indigo-600 transition-transform duration-200" id="totalPrice">
+                        €0,00
+                    </div>
+                </div>
+
+                <button onclick="window.print()" class="w-full py-4 bg-slate-900 hover:bg-black text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex justify-center items-center gap-3 no-print group">
+                    <i class="fas fa-print group-hover:scale-110 transition-transform"></i> 
+                    <span>Stampa Preventivo</span>
+                </button>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-auto py-6 text-center text-slate-400 text-sm font-medium no-print">
+        developed with <i class="fas fa-heart text-red-400 mx-1 animate-pulse"></i> by Angelo
+    </footer>
+
+    <!-- LOGICA JS -->
+    <script>
+        
+        /**
+         * DATI CATALOGO
+         * Modifica qui i prezzi per ogni fornitore
+         */
+        const catalog = {
+            'f1': {
+                name: "Fornitore 1 (Placeholder)",
+                formats: [
+                    { name: "Formato A (Placeholder)", price: 150 }, 
+                    { name: "Formato B (Placeholder)", price: 140 },
+                    { name: "Formato C (Placeholder)", price: 140 }
+                ],
+                covers: [
+                    { name: "Materiale Copertina A (Placeholder)", price: 30 },
+                    { name: "Materiale Copertina B (Placeholder)", price: 60 },
+                    { name: "Materiale Copertina C (Placeholder)", price: 40 },
+                ],
+                spines: [
+                    { name: "Schiena A (Placeholder)", price: 0 },
+                    { name: "Schiena B (Placeholder)", price: 20 },
+                ],
+                internals: [
+                    { name: "Interno Tipo A (Placeholder)", pricePerSheet: 2.00 },
+                    { name: "Interno Tipo B (Placeholder)", pricePerSheet: 4.50 },
+                ],
+                extras: [
+                    { name: "Extra A (Placeholder)", price: 50 },
+                    { name: "Extra B (Placeholder)", price: 15 },
+                    { name: "Extra C (Placeholder)", price: 25 }
+                ]
+            },
+            'f2': {
+                name: "Fornitore 2 (Placeholder)",
+                formats: [
+                    { name: "Formato A (Placeholder)", price: 80 },
+                    { name: "Formato B (Placeholder)", price: 100 }
+                ],
+                covers: [
+                    { name: "Materiale Copertina A (Placeholder)", price: 20 },
+                    { name: "Materiale Copertina B (Placeholder)", price: 35 }
+                ],
+                spines: [
+                    { name: "Schiena A (Placeholder)", price: 0 }
+                ],
+                internals: [
+                    { name: "Interno Tipo A (Placeholder)", pricePerSheet: 1.20 },
+                    { name: "Interno Tipo B (Placeholder)", pricePerSheet: 1.80 }
+                ],
+                extras: [
+                    { name: "Extra A (Placeholder)", price: 10 },
+                    { name: "Extra B (Placeholder)", price: 80 }
+                ]
+            },
+            'f3': {
+                name: "Fornitore 3 (Placeholder)",
+                formats: [
+                    { name: "Formato A (Placeholder)", price: 100 },
+                    { name: "Formato B (Placeholder)", price: 120 }
+                ],
+                covers: [
+                    { name: "Materiale Copertina A (Placeholder)", price: 25 },
+                    { name: "Materiale Copertina B (Placeholder)", price: 45 }
+                ],
+                spines: [
+                    { name: "Schiena A (Placeholder)", price: 10 },
+                    { name: "Schiena B (Placeholder)", price: 20 }
+                ],
+                internals: [
+                    { name: "Interno Tipo A (Placeholder)", pricePerSheet: 1.50 },
+                    { name: "Interno Tipo B (Placeholder)", pricePerSheet: 3.00 }
+                ],
+                extras: [
+                    { name: "Extra A (Placeholder)", price: 15 },
+                    { name: "Extra B (Placeholder)", price: 30 }
+                ]
+            }
+        };
+
+
+        /* RIFERIMENTI DOM */
+        const els = {
+            supplier: document.getElementById('supplierSelect'),
+            format: document.getElementById('formatSelect'),
+            cover: document.getElementById('coverSelect'),
+            spine: document.getElementById('spineSelect'),
+            internal: document.getElementById('internalSelect'),
+            pages: document.getElementById('pageInput'),
+            extrasContainer: document.getElementById('extrasContainer'),
+            summaryName: document.getElementById('selectedSupplierName'),
+            costFormat: document.getElementById('costFormat'),
+            costCover: document.getElementById('costCover'),
+            costSpine: document.getElementById('costSpine'),
+            costInternals: document.getElementById('costInternals'),
+            summaryPages: document.getElementById('summaryPages'),
+            costExtras: document.getElementById('costExtras'),
+            total: document.getElementById('totalPrice')
+        };
+
+        // SETUP INIZIALE
+        function init() {
+            for (const key in catalog) {
+                const opt = new Option(catalog[key].name, key);
+                els.supplier.add(opt);
+            }
+            
+            els.supplier.addEventListener('change', loadSupplierOptions);
+            
+            const inputs = [els.format, els.cover, els.spine, els.internal, els.pages];
+            inputs.forEach(el => el.addEventListener('change', calculate));
+            els.pages.addEventListener('input', calculate);
+
+            loadSupplierOptions();
+        }
+
+        // CARICA OPZIONI
+        function loadSupplierOptions() {
+            const supplierKey = els.supplier.value;
+            const data = catalog[supplierKey];
+
+            els.summaryName.innerText = data.name;
+
+            const populate = (selectElement, items, isSheetPrice = false) => {
+                selectElement.innerHTML = '';
+                items.forEach(item => {
+                    let priceLabel = isSheetPrice ? `€${item.pricePerSheet.toFixed(2)}/fg` : `+€${item.price}`;
+                    let optionText = `${item.name} (${priceLabel})`;
+                    if (!isSheetPrice && item.price === 0) optionText = item.name;
+
+                    const opt = new Option(optionText, JSON.stringify(item)); 
+                    selectElement.add(opt);
+                });
+            };
+
+            populate(els.format, data.formats);
+            populate(els.cover, data.covers);
+            populate(els.spine, data.spines);
+            populate(els.internal, data.internals, true);
+
+            els.extrasContainer.innerHTML = '';
+            data.extras.forEach((extra, index) => {
+                const div = document.createElement('div');
+                // Stile della card checkbox
+                div.className = "flex items-center p-3.5 border border-slate-200 rounded-lg hover:border-indigo-300 hover:bg-indigo-50/30 cursor-pointer transition-all group";
+                div.innerHTML = `
+                    <input type="checkbox" id="extra_${index}" data-price="${extra.price}" class="w-5 h-5 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500 cursor-pointer custom-checkbox extra-cb transition-colors">
+                    <label for="extra_${index}" class="ml-3 text-sm text-slate-600 w-full flex justify-between cursor-pointer group-hover:text-slate-800 select-none">
+                        <span class="font-medium">${extra.name}</span>
+                        <span class="font-bold text-indigo-600/80">+€${extra.price}</span>
+                    </label>
+                `;
+                div.addEventListener('change', calculate);
+                els.extrasContainer.appendChild(div);
+            });
+
+            calculate();
+        }
+
+        window.adjustPages = function(delta) {
+            let val = parseInt(els.pages.value) || 0;
+            val += delta;
+            if (val < 10) val = 10; // Minimo pagine
+            if (val > 100) val = 100; // Massimo pagine
+            els.pages.value = val;
+            calculate();
+        }
+
+        let previousTotal = 0;
+
+        function calculate() {
+            const getPrice = (el) => el.value ? (JSON.parse(el.value).price || 0) : 0;
+            const getSheetPrice = (el) => el.value ? (JSON.parse(el.value).pricePerSheet || 0) : 0;
+
+            const pFormat = getPrice(els.format);
+            const pCover = getPrice(els.cover);
+            const pSpine = getPrice(els.spine);
+            const numPages = parseInt(els.pages.value) || 0;
+            const pSheet = getSheetPrice(els.internal);
+            const pInternalsTotal = pSheet * numPages;
+
+            let pExtras = 0;
+            document.querySelectorAll('.extra-cb:checked').forEach(cb => {
+                pExtras += parseFloat(cb.dataset.price);
+            });
+
+            const total = pFormat + pCover + pSpine + pInternalsTotal + pExtras;
+
+            // UI Updates
+            els.costFormat.innerText = `€${pFormat}`;
+            els.costCover.innerText = `€${pCover}`;
+            els.costSpine.innerText = `€${pSpine}`;
+            els.summaryPages.innerText = numPages;
+            els.costInternals.innerText = `€${pInternalsTotal.toFixed(2)}`;
+            els.costExtras.innerText = `€${pExtras}`;
+            
+            // Aggiorna totale
+            els.total.innerText = `€${total.toFixed(2)}`;
+
+            // Animazione se il prezzo cambia
+            if (total !== previousTotal) {
+                // Rimuovi la classe per resettare l'animazione (hack per riavviare keyframe css)
+                els.total.classList.remove('price-anim');
+                void els.total.offsetWidth; // Trigger reflow
+                els.total.classList.add('price-anim');
+            }
+            previousTotal = total;
+        }
+
+        init();
+
+    </script>
+</body>
+</html>
