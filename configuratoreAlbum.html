@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Configuratore album</title>
+    <title>Preventivatore Studio - Avanzato</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <style>
@@ -26,15 +26,15 @@
         }
     </style>
 </head>
-<body class="text-slate-800 min-h-screen p-4 md:p-6">
+<body class="text-slate-800 min-h-screen p-4 md:p-6 flex flex-col justify-between">
 
-    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         <!-- HEADER -->
         <div class="lg:col-span-12 flex flex-col md:flex-row justify-between items-center mb-2 no-print gap-4">
             <div>
-                <h1 class="text-2xl font-bold text-slate-900">Configuratore album</h1>
-                <p class="text-sm text-slate-500">Version 1.0 - release 28 nov 25</p>
+                <h1 class="text-2xl font-bold text-slate-900">Preventivatore Studio</h1>
+                <p class="text-sm text-slate-500">Calcolo margini e preventivo clienti</p>
             </div>
             
             <div class="flex gap-4">
@@ -196,6 +196,11 @@
         </div>
     </div>
 
+    <!-- FOOTER -->
+    <footer class="mt-12 py-6 text-center text-slate-400 text-sm font-medium no-print">
+        Developer with <i class="fas fa-heart text-red-400 mx-1 animate-pulse"></i> by Angelo
+    </footer>
+
     <!-- SCRIPT LOGICA -->
     <script>
         
@@ -226,7 +231,7 @@
 
                 internals: {
                     baseIncluded: 30,
-                    baseCost: 8.00, 
+                    baseCost: 20.00, 
                     special: [
                         { id: 'soft_touch', name: "Soft-touch", cost: 2.50 },
                         { id: 'velina', name: "Velina", cost: 6.00 },
