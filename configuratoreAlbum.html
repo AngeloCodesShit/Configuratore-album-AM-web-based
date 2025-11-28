@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Configuratore album</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+        
+        .counter-btn { @apply w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-300 transition-all flex items-center justify-center shadow-sm; }
+        .section-title { @apply text-xs font-bold text-slate-400 uppercase tracking-wider mb-3; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #c7c7c7; border-radius: 4px; }
+
+        @media print {
+            .no-print { display: none !important; }
+            .print-full { width: 100% !important; grid-column: span 12 !important; }
+            body { background: white; }
+            .shadow-xl { box-shadow: none !important; border: 1px solid #ccc; }
+        }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen p-4 md:p-6">
+
+    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- HEADER -->
+        <div class="lg:col-span-12 flex flex-col md:flex-row justify-between items-center mb-2 no-print gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-900">Configuratore album</h1>
+                <p class="text-sm text-slate-500">Version 1.0 - release 28 nov 25</p>
+            </div>
+            
+            <div class="flex gap-4">
+                 <!-- BUNDLE SELECTOR -->
+                 <div class="relative">
+                    <label class="absolute -top-2.5 left-3 bg-white px-1 text-[10px] font-bold text-indigo-600 uppercase tracking-wider">Bundle / Offerte</label>
+                    <select id="bundleSelect" class="bg-indigo-50 border-indigo-200 text-indigo-900 font-bold py-2.5 px-4 rounded-lg shadow-sm border-2 focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer w-64">
+                        <option value="">Nessun Bundle (Personalizzato)</option>
+                        <!-- JS injected -->
+                    </select>
+                </div>
+
+                <!-- SUPPLIER SELECTOR -->
+                <div class="relative">
+                    <label class="absolute -top-2.5 left-3 bg-[#f1f5f9] px-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Fornitore</label>
+                    <select id="supplierSelect" class="bg-white border-slate-200 text-slate-700 font-bold py-2.5 px-4 rounded-lg shadow-sm border focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer">
+                        <!-- JS injected -->
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLONNA INPUT (8/12) -->
+        <div class="lg:col-span-8 space-y-6 no-print">
+            
+            <form id="calculatorForm" class="space-y-6">
+                
+                <!-- 1. TIPO ALBUM & STRUTTURA -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                    <div class="flex items-center gap-2 mb-4 border-b border-slate-100 pb-2">
+                        <i class="fas fa-book text-indigo-500"></i>
+                        <h3 class="font-bold text-slate-800">Album Principal</h3>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <p class="section-title">Tipo Album (Base + Add-on)</p>
+                            <select id="albumTypeSelect" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg font-medium text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 transition-all"></select>
+                        </div>
+                        <div>
+                            <p class="section-title">Cofanetto</p> <!-- Modificato da Copertina a Cofanetto -->
+                            <select id="coverSelect" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg font-medium text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 transition-all"></select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. INTERNI (PAGINE) -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200 relative overflow-hidden">
+                    <div class="flex items-center gap-2 mb-4 border-b border-slate-100 pb-2">
+                        <i class="fas fa-layer-group text-indigo-500"></i>
+                        <h3 class="font-bold text-slate-800">Interni & Carte Speciali</h3>
+                    </div>
+
+                    <!-- Base Pages -->
+                    <div class="flex items-center justify-between bg-indigo-50/50 p-4 rounded-lg mb-6 border border-indigo-100">
+                        <div>
+                            <span class="font-bold text-slate-700">Interni Totali</span>
+                            <p class="text-xs text-slate-500">Standard inclusi: <span class="font-bold">30</span></p>
+                        </div>
+                        <div class="flex items-center gap-3 bg-white px-2 py-1 rounded-lg shadow-sm">
+                            <button type="button" onclick="adjustMainPages(-1)" class="counter-btn"><i class="fas fa-minus text-xs"></i></button>
+                            <input type="number" id="basePagesInput" value="30" class="w-12 text-center font-bold bg-transparent outline-none">
+                            <button type="button" onclick="adjustMainPages(1)" class="counter-btn"><i class="fas fa-plus text-xs"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Warning dinamico -->
+                    <div id="paperWarning" class="hidden mb-4 p-3 bg-yellow-50 text-yellow-700 text-sm rounded-lg border border-yellow-200 flex items-start gap-2">
+                        <i class="fas fa-exclamation-circle mt-0.5"></i>
+                        <span>Hai aggiunto carte speciali. Il costo si somma a quello base.</span>
+                    </div>
+
+                    <!-- Special Papers Grid -->
+                    <div id="specialPapersContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- JS injected -->
+                    </div>
+                </div>
+
+                <!-- 3. MINI ALBUM -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                    <div class="flex items-center gap-2 mb-4 border-b border-slate-100 pb-2">
+                        <i class="fas fa-child text-indigo-500"></i>
+                        <h3 class="font-bold text-slate-800">Mini Album (Genitori)</h3>
+                    </div>
+                    <div id="miniContainer" class="space-y-4">
+                        <!-- JS injected -->
+                    </div>
+                </div>
+
+                <!-- 4. EXTRA & ACCESSORI -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                    <div class="flex items-center gap-2 mb-4 border-b border-slate-100 pb-2">
+                        <i class="fas fa-star text-indigo-500"></i>
+                        <h3 class="font-bold text-slate-800">Extra & Accessori</h3>
+                    </div>
+                    <div id="extrasContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- JS injected -->
+                    </div>
+                </div>
+
+            </form>
+        </div>
+
+        <!-- COLONNA RIEPILOGO (4/12) -->
+        <div class="lg:col-span-4 print-full">
+            <div class="bg-white rounded-xl shadow-lg border border-slate-200 p-6 sticky top-6">
+                
+                <div class="flex justify-between items-start mb-1">
+                    <h2 class="text-xl font-bold text-slate-800">Riepilogo</h2>
+                    <span id="activeBundleBadge" class="hidden px-2 py-1 bg-indigo-100 text-indigo-700 text-[10px] font-bold uppercase rounded tracking-wide">Bundle Attivo</span>
+                </div>
+                <p class="text-xs text-slate-400 uppercase font-bold tracking-wider mb-6" id="supplierNameDisplay">Fornitore</p>
+
+                <!-- Tabella Dettagli -->
+                <div class="space-y-3 text-sm mb-6 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
+                    <div id="recapList" class="space-y-2">
+                        <!-- Lista dinamica items -->
+                    </div>
+                </div>
+
+                <!-- Totali -->
+                <div class="border-t-2 border-slate-100 pt-4 space-y-4">
+                    
+                    <!-- Costo Studio -->
+                    <div class="flex justify-between items-center bg-red-50 p-3 rounded-lg border border-red-100 no-print opacity-70 hover:opacity-100 transition-opacity">
+                        <span class="text-red-800 font-semibold text-sm"><i class="fas fa-wallet mr-2"></i>Costo Studio (Reale)</span>
+                        <span class="text-red-900 font-bold text-lg" id="totalCostDisplay">€0,00</span>
+                    </div>
+
+                    <!-- Prezzo Cliente -->
+                    <div class="bg-slate-900 p-5 rounded-xl text-center text-white shadow-xl relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <i class="fas fa-tags text-4xl"></i>
+                        </div>
+                        <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Prezzo Cliente</p>
+                        <div class="text-4xl font-extrabold tracking-tight" id="totalSellDisplay">€0,00</div>
+                        
+                        <!-- Dettaglio Bundle + Extra -->
+                        <div id="bundleBreakdown" class="hidden mt-2 pt-2 border-t border-slate-700/50 flex flex-col gap-1">
+                             <div class="flex justify-between text-xs text-green-400">
+                                <span>Bundle Base:</span>
+                                <span class="font-bold" id="bundleBasePriceDisp">€0</span>
+                             </div>
+                             <div class="flex justify-between text-xs text-orange-400">
+                                <span>Extra Aggiunti:</span>
+                                <span class="font-bold" id="bundleExtraPriceDisp">€0</span>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 text-center">
+                    <button onclick="window.print()" class="text-indigo-600 font-semibold text-sm hover:underline no-print">
+                        <i class="fas fa-print mr-1"></i> Stampa Preventivo
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT LOGICA -->
+    <script>
+        
+        // ==========================================
+        // CONFIGURAZIONE GLOBALE
+        // ==========================================
+        
+        const MULTIPLIER = 1.5; 
+
+        const catalog = {
+            'recordia': {
+                name: "Recordia",
+                baseAlbumCost: 140, // Costo Base Struttura
+
+                // Tipi (Add-on sul base)
+                // Costo Totale = 140 + Addon
+                types: [
+                    { id: 'basic', name: "Basic", addonCost: 0 },
+                    { id: 'woodplus', name: "Woodplus 6 (con foto)", addonCost: 70 },
+                    { id: 'anniversary', name: "Anniversary", addonCost: 140 }
+                ],
+
+                covers: [
+                    { name: "Standard Inclusa", cost: 0 },
+                    { name: "Pelle Premium (Placeholder)", cost: 50 },
+                    { name: "Tessuto (Placeholder)", cost: 30 }
+                ],
+
+                internals: {
+                    baseIncluded: 30,
+                    baseCost: 8.00, 
+                    special: [
+                        { id: 'soft_touch', name: "Soft-touch", cost: 2.50 },
+                        { id: 'velina', name: "Velina", cost: 6.00 },
+                        { id: 'cartoncino', name: "Cartoncino", cost: 4.50 }
+                    ]
+                },
+
+                mini: [
+                    { id: 'mini_unit', name: "Mini Album (pz)", cost: 45.90 },
+                    { id: 'mini_engrave', name: "Incisione Mini (cad)", cost: 14.80 },
+                    { id: 'mini_fabric', name: "Tessuto Extra Mini", cost: 20.00, sellPrice: 30.00 }
+                ],
+
+                extras: [
+                    { id: 'led_bar', name: "Barra LED", cost: 40.00, sellPrice: 100.00, type: 'counter' },
+                    { id: 'paint_small', name: "Pittura Piccola", cost: 12.00, sellPrice: 18.00, type: 'counter' },
+                    { id: 'paint_big', name: "Pittura Grande", cost: 0.00, sellPrice: 0.00, type: 'counter' }, 
+                    { id: 'pocket', name: "Tascabile", cost: 25.50, sellPrice: 39.25, type: 'counter' },
+                    { id: 'uv_paint', name: "Verniciatura UV (Placeholder)", cost: 25.00, type: 'checkbox' }
+                ],
+
+                // Bundles Config
+                bundles: [
+                    {
+                        id: 'bundle_basic',
+                        name: "Bundle Basic (Offerta 370€)",
+                        fixedSellPrice: 370.00,
+                        config: {
+                            typeIndex: 0, // Basic
+                            basePages: 30,
+                            mini: { 'mini_unit': 2 },
+                            special: { 'soft_touch': 1, 'velina': 1, 'cartoncino': 1 },
+                            extras: { 'paint_small': 1 }
+                        }
+                    }
+                ]
+            },
+
+            'other': {
+                name: "Altro Fornitore",
+                baseAlbumCost: 100,
+                types: [{ id: 'std', name: "Standard", addonCost: 0 }],
+                covers: [{ name: "Base", cost: 0 }],
+                internals: { baseIncluded: 30, baseCost: 5.00, special: [] },
+                mini: [],
+                extras: [],
+                bundles: []
+            }
+        };
+
+        // ==========================================
+        // LOGICA APPLICAZIONE
+        // ==========================================
+
+        let state = {
+            supplier: 'recordia',
+            activeBundleId: null, // null or 'bundle_basic'
+            typeIndex: 0,
+            coverIndex: 0,
+            basePages: 30,
+            specialPapers: {}, 
+            miniCounts: {},    
+            extraCounts: {}    
+        };
+
+        const els = {
+            supplier: document.getElementById('supplierSelect'),
+            bundle: document.getElementById('bundleSelect'),
+            type: document.getElementById('albumTypeSelect'),
+            cover: document.getElementById('coverSelect'),
+            basePages: document.getElementById('basePagesInput'),
+            specialContainer: document.getElementById('specialPapersContainer'),
+            miniContainer: document.getElementById('miniContainer'),
+            extrasContainer: document.getElementById('extrasContainer'),
+            paperWarning: document.getElementById('paperWarning'),
+            
+            supplierName: document.getElementById('supplierNameDisplay'),
+            recapList: document.getElementById('recapList'),
+            totalCost: document.getElementById('totalCostDisplay'),
+            totalSell: document.getElementById('totalSellDisplay'),
+            bundleBadge: document.getElementById('activeBundleBadge'),
+            
+            bundleBreakdown: document.getElementById('bundleBreakdown'),
+            bundleBasePriceDisp: document.getElementById('bundleBasePriceDisp'),
+            bundleExtraPriceDisp: document.getElementById('bundleExtraPriceDisp')
+        };
+
+        function init() {
+            // Populate Suppliers
+            for(let key in catalog) {
+                els.supplier.add(new Option(catalog[key].name, key));
+            }
+
+            // Global Listeners
+            els.supplier.addEventListener('change', (e) => {
+                state.supplier = e.target.value;
+                resetState();
+                renderInterface();
+            });
+
+            els.bundle.addEventListener('change', (e) => {
+                const bundleId = e.target.value;
+                if(bundleId) applyBundle(bundleId);
+                else {
+                    state.activeBundleId = null;
+                    calculate();
+                }
+            });
+
+            // Input Listeners
+            // NOTA: Rimossa la chiamata a checkCustomMode() da basePages, specialPapers, minis, extras per permettere l'aggiunta su bundle
+            
+            els.type.addEventListener('change', (e) => { 
+                state.typeIndex = e.target.value; 
+                checkCustomMode(true); // Se cambi il tipo album, il bundle salta
+                calculate(); 
+            });
+            els.cover.addEventListener('change', (e) => { 
+                state.coverIndex = e.target.value; 
+                calculate(); 
+            });
+            els.basePages.addEventListener('input', (e) => {
+                state.basePages = parseInt(e.target.value) || 0;
+                calculate();
+            });
+
+            resetState();
+            renderInterface();
+        }
+
+        function resetState() {
+            state.activeBundleId = null;
+            state.typeIndex = 0;
+            state.coverIndex = 0;
+            state.specialPapers = {};
+            state.miniCounts = {};
+            state.extraCounts = {};
+            if(catalog[state.supplier]) {
+                state.basePages = catalog[state.supplier].internals.baseIncluded;
+            }
+        }
+
+        function applyBundle(bundleId) {
+            const data = catalog[state.supplier];
+            const bundle = data.bundles.find(b => b.id === bundleId);
+            if(!bundle) return;
+
+            state.activeBundleId = bundleId;
+            const cfg = bundle.config;
+
+            // Apply Config
+            state.typeIndex = cfg.typeIndex;
+            state.basePages = cfg.basePages;
+            state.miniCounts = { ...cfg.mini }; // clone
+            state.specialPapers = { ...cfg.special }; // clone
+            state.extraCounts = { ...cfg.extras }; // clone
+            state.coverIndex = 0; // Default cover
+
+            els.type.value = state.typeIndex;
+            els.basePages.value = state.basePages;
+            
+            renderInterface(); 
+        }
+
+        // Resetta il bundle solo se cambiamo cose strutturali (tipo album o fornitore)
+        function checkCustomMode(force = false) {
+            if(force && state.activeBundleId) {
+                state.activeBundleId = null;
+                els.bundle.value = "";
+                calculate();
+            }
+        }
+
+        window.adjustMainPages = (delta) => {
+            state.basePages += delta;
+            if(state.basePages < 0) state.basePages = 0;
+            els.basePages.value = state.basePages;
+            calculate();
+        };
+
+        window.adjustCounter = (category, id, delta) => {
+            if(category === 'special') {
+                if(!state.specialPapers[id]) state.specialPapers[id] = 0;
+                state.specialPapers[id] += delta;
+                if(state.specialPapers[id] < 0) state.specialPapers[id] = 0;
+            }
+            else if (category === 'mini') {
+                if(!state.miniCounts[id]) state.miniCounts[id] = 0;
+                state.miniCounts[id] += delta;
+                if(state.miniCounts[id] < 0) state.miniCounts[id] = 0;
+            }
+            else if (category === 'extra') {
+                if(!state.extraCounts[id]) state.extraCounts[id] = 0;
+                state.extraCounts[id] += delta;
+                if(state.extraCounts[id] < 0) state.extraCounts[id] = 0;
+            }
+            
+            document.getElementById(`input_${category}_${id}`).value = 
+                (category === 'special' ? state.specialPapers[id] : 
+                 category === 'mini' ? state.miniCounts[id] : state.extraCounts[id]) || 0;
+            
+            calculate();
+        };
+
+        function renderInterface() {
+            const data = catalog[state.supplier];
+            els.supplierName.innerText = data.name;
+
+            // 0. Bundles
+            els.bundle.innerHTML = '<option value="">Nessun Bundle (Personalizzato)</option>';
+            if(data.bundles) {
+                data.bundles.forEach(b => {
+                    els.bundle.add(new Option(b.name, b.id));
+                });
+            }
+            els.bundle.value = state.activeBundleId || "";
+
+            // 1. Types
+            els.type.innerHTML = '';
+            data.types.forEach((t, i) => {
+                const totalCost = data.baseAlbumCost + t.addonCost;
+                els.type.add(new Option(`${t.name} (Base €${data.baseAlbumCost} + €${t.addonCost})`, i));
+            });
+            els.type.value = state.typeIndex;
+
+            // 2. Covers
+            els.cover.innerHTML = '';
+            data.covers.forEach((c, i) => {
+                els.cover.add(new Option(`${c.name} ${c.cost > 0 ? '(+€'+c.cost+')' : ''}`, i));
+            });
+            els.cover.value = state.coverIndex;
+
+            // 3. Base Pages
+            els.basePages.value = state.basePages;
+
+            // 4. Special Papers
+            els.specialContainer.innerHTML = '';
+            data.internals.special.forEach(paper => {
+                const qty = state.specialPapers[paper.id] || 0;
+                els.specialContainer.innerHTML += createCounterHTML('special', paper, qty);
+            });
+
+            // 5. Mini
+            els.miniContainer.innerHTML = '';
+            data.mini.forEach(item => {
+                const qty = state.miniCounts[item.id] || 0;
+                els.miniContainer.innerHTML += createCounterHTML('mini', item, qty);
+            });
+
+            // 6. Extras
+            els.extrasContainer.innerHTML = '';
+            data.extras.forEach(item => {
+                if(item.type === 'counter') {
+                    const qty = state.extraCounts[item.id] || 0;
+                    els.extrasContainer.innerHTML += createCounterHTML('extra', item, qty);
+                }
+            });
+
+            calculate();
+        }
+
+        function createCounterHTML(category, item, qty) {
+            const sellPrice = item.sellPrice !== undefined ? item.sellPrice : (item.cost * MULTIPLIER);
+            return `
+                <div class="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                    <div class="overflow-hidden">
+                        <div class="text-sm font-semibold text-slate-700 truncate">${item.name}</div>
+                        <div class="text-xs text-slate-400">Costo: €${item.cost} | Vendita: €${sellPrice.toFixed(2)}</div>
+                    </div>
+                    <div class="flex items-center gap-2 ml-2">
+                        <button type="button" onclick="adjustCounter('${category}', '${item.id}', -1)" class="counter-btn"><i class="fas fa-minus text-[10px]"></i></button>
+                        <input id="input_${category}_${item.id}" type="number" readonly value="${qty}" class="w-8 text-center bg-transparent font-bold text-sm text-slate-700 outline-none">
+                        <button type="button" onclick="adjustCounter('${category}', '${item.id}', 1)" class="counter-btn"><i class="fas fa-plus text-[10px]"></i></button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function calculate() {
+            const data = catalog[state.supplier];
+            
+            // Variabili per i totali
+            let totalCostStudio = 0; // Costo reale per lo studio (sempre calcolato reale)
+            let standardSellPrice = 0; // Prezzo di vendita se non ci fosse il bundle
+            let recapHTML = '';
+
+            // Recupera dati del bundle se attivo
+            let bundleConfig = null;
+            let bundleObj = null;
+            if (state.activeBundleId) {
+                bundleObj = data.bundles.find(b => b.id === state.activeBundleId);
+                if (bundleObj) bundleConfig = bundleObj.config;
+            }
+
+            // Funzione helper per calcolare i costi e generare il recap
+            // typeID: id univoco oggetto (es. 'mini_unit', 'basic_album') per confronto col bundle
+            const processItem = (name, cost, sell, qty, typeId, category) => {
+                if(qty <= 0) return;
+
+                const totCost = cost * qty;
+                const totSell = sell * qty;
+                
+                // Il costo studio è sempre pieno
+                totalCostStudio += totCost;
+                standardSellPrice += totSell;
+
+                // Logica visualizzazione Recap
+                let displayText = "";
+                let displayPrice = "";
+
+                if (state.activeBundleId && bundleConfig) {
+                    // C'è un bundle attivo. Verifichiamo se questo oggetto è nel bundle.
+                    let includedQty = 0;
+
+                    if (category === 'album') { 
+                         // L'album base è incluso se il tipo corrisponde
+                         // Ma qui siamo generici, supponiamo incluso se siamo in bundle mode
+                         includedQty = 1; 
+                    } else if (category === 'pages') {
+                         includedQty = bundleConfig.basePages;
+                    } else if (category === 'mini') {
+                         includedQty = bundleConfig.mini[typeId] || 0;
+                    } else if (category === 'special') {
+                         includedQty = bundleConfig.special[typeId] || 0;
+                    } else if (category === 'extra') {
+                         includedQty = bundleConfig.extras[typeId] || 0;
+                    }
+
+                    // Calcolo Extra
+                    const extraQty = Math.max(0, qty - includedQty);
+                    const isFullyIncluded = extraQty === 0;
+
+                    if (isFullyIncluded) {
+                        displayText = `${name} <span class="text-[10px] bg-indigo-100 text-indigo-700 px-1 rounded ml-1">Incluso</span>`;
+                        displayPrice = `<span class="text-slate-400 line-through text-[10px]">€${totSell.toFixed(0)}</span>`;
+                    } else {
+                        // Parzialmente o totalmente extra
+                        const extraSell = extraQty * sell;
+                        if (includedQty > 0) {
+                            displayText = `${name} (Inc: ${includedQty}, <b>Extra: ${extraQty}</b>)`;
+                        } else {
+                            displayText = `${name} ${qty > 1 ? `x${qty}` : ''}`;
+                        }
+                        displayPrice = `<span class="font-bold text-orange-600">+€${extraSell.toFixed(2)}</span>`;
+                    }
+                } else {
+                    // Modalità Standard
+                    displayText = `${name} ${qty > 1 ? `<span class="text-xs text-indigo-600 font-bold">x${qty}</span>` : ''}`;
+                    displayPrice = `<span class="font-bold text-slate-800">€${totSell.toFixed(2)}</span>`;
+                }
+
+                recapHTML += `
+                    <div class="flex justify-between items-start pb-2 border-b border-slate-50 last:border-0">
+                        <div>
+                            <span class="block text-slate-700 font-medium text-xs">${displayText}</span>
+                            <span class="text-[10px] text-slate-400">Costo: €${totCost.toFixed(2)}</span>
+                        </div>
+                        <div>${displayPrice}</div>
+                    </div>
+                `;
+            };
+
+            // --- 1. Struttura ---
+            const type = data.types[state.typeIndex];
+            const structureCost = data.baseAlbumCost + type.addonCost;
+            const typeSell = type.sellPrice || (structureCost * MULTIPLIER);
+            processItem(`Album ${type.name}`, structureCost, typeSell, 1, 'album_base', 'album');
+
+            // --- 2. Cofanetto ---
+            const cover = data.covers[state.coverIndex];
+            if(cover.cost > 0) {
+                processItem(cover.name, cover.cost, cover.cost * MULTIPLIER, 1, 'cover', 'cover'); // Cofanetto mai nel bundle config per ora
+            }
+
+            // --- 3. Pagine Extra (Totali) ---
+            // Nota: Se bundle ha 30 pag, e noi mettiamo 32. 
+            // processItem gestisce la logica "Incluso vs Extra"
+            // Dobbiamo passare il totale delle pagine extra (rispetto al base catalogo 30) o totale assoluto?
+            // Passiamo le pagine totali, ma il costo è per foglio.
+            // Semplificazione: Calcoliamo il costo delle pagine e lo passiamo come item unico "Pagine"
+            // Ma per il bundle check serve la quantità.
+            // Facciamo così: trattiamo "Pagine Totali" come item.
+            
+            // Nel catalogo baseCost è per pagina AGGIUNTIVA alle 30 standard.
+            // Se ho 32 pagine -> 2 aggiuntive. Costo = 2 * 8.
+            // Se Bundle include 30 pagine -> 2 aggiuntive sono extra.
+            
+            // Il sistema attuale gestisce "Variazione Pagine".
+            // Se pagine = 30, diff = 0.
+            const diffPages = state.basePages - data.internals.baseIncluded; // Es. 32 - 30 = 2
+            // Attenzione: se bundle include 30 pagine e noi ne abbiamo 32, sono 2 extra.
+            // Se noi abbiamo 30 pagine, sono 0 extra.
+            
+            if (diffPages !== 0) {
+                const costDiff = diffPages * data.internals.baseCost;
+                const sellDiff = costDiff * MULTIPLIER;
+                // Qui è un po' tricky per il processItem perché quantità è 1 (una voce "Variazione") ma il valore dipende dai fogli.
+                // Gestione manuale per il recap HTML pagine
+                totalCostStudio += costDiff;
+                standardSellPrice += sellDiff;
+
+                let pageDisplay = "";
+                let pagePrice = "";
+                
+                if (state.activeBundleId && bundleConfig) {
+                    // Pagine nel bundle vs Pagine attuali
+                    const bundlePages = bundleConfig.basePages;
+                    const currentPages = state.basePages;
+                    const extraPages = Math.max(0, currentPages - bundlePages);
+                    
+                    if (extraPages > 0) {
+                         const extraSell = extraPages * data.internals.baseCost * MULTIPLIER;
+                         pageDisplay = `Pagine Extra (${extraPages} fogli)`;
+                         pagePrice = `<span class="font-bold text-orange-600">+€${extraSell.toFixed(2)}</span>`;
+                    } else {
+                         // Pagine incluse o meno del bundle
+                         pageDisplay = `Variazione Pagine (${diffPages})`;
+                         pagePrice = `<span class="text-slate-400 line-through text-[10px]">Incluso</span>`;
+                    }
+                } else {
+                    pageDisplay = `Variazione Pagine (${state.basePages})`;
+                    pagePrice = `<span class="font-bold ${sellDiff < 0 ? 'text-green-600' : 'text-slate-800'}">€${sellDiff.toFixed(2)}</span>`;
+                }
+
+                if (pageDisplay) {
+                    recapHTML += `
+                        <div class="flex justify-between items-start pb-2 border-b border-slate-50">
+                            <div>
+                                <span class="block text-slate-700 font-medium text-xs">${pageDisplay}</span>
+                                <span class="text-[10px] text-slate-400">Diff: ${diffPages} fogli</span>
+                            </div>
+                            <div>${pagePrice}</div>
+                        </div>
+                    `;
+                }
+            }
+
+            // --- 4. Special, Mini, Extras ---
+            data.internals.special.forEach(p => {
+                const qty = state.specialPapers[p.id] || 0;
+                const sell = p.sellPrice !== undefined ? p.sellPrice : (p.cost * MULTIPLIER);
+                processItem(p.name, p.cost, sell, qty, p.id, 'special');
+            });
+            data.mini.forEach(m => {
+                const qty = state.miniCounts[m.id] || 0;
+                const sell = m.sellPrice !== undefined ? m.sellPrice : (m.cost * MULTIPLIER);
+                processItem(m.name, m.cost, sell, qty, m.id, 'mini');
+            });
+            data.extras.forEach(x => {
+                const qty = state.extraCounts[x.id] || 0;
+                const sell = x.sellPrice !== undefined ? x.sellPrice : (x.cost * MULTIPLIER);
+                processItem(x.name, x.cost, sell, qty, x.id, 'extra');
+            });
+
+
+            // CALCOLO FINALE (Bundle Override Logic)
+            let finalSellPrice = standardSellPrice;
+            let bundleExtraCost = 0;
+
+            if (state.activeBundleId && bundleObj) {
+                // Prezzo Base Bundle
+                const baseBundlePrice = bundleObj.fixedSellPrice;
+                
+                // Calcoliamo il costo degli EXTRA
+                // Per farlo, sottraiamo al "Prezzo Standard Totale" il valore degli oggetti inclusi nel bundle
+                // Ma è più sicuro ricalcolare solo gli extra.
+                
+                // Ricalcolo preciso Extra sopra il bundle:
+                let extraAddedVal = 0;
+
+                // 1. Pagine Extra
+                const extraP = Math.max(0, state.basePages - bundleConfig.basePages);
+                extraAddedVal += extraP * data.internals.baseCost * MULTIPLIER;
+
+                // 2. Items Extra
+                const calcExtraItem = (arr, cat) => {
+                    arr.forEach(item => {
+                        const currentQty = (cat === 'mini' ? state.miniCounts[item.id] : 
+                                          cat === 'special' ? state.specialPapers[item.id] : 
+                                          state.extraCounts[item.id]) || 0;
+                        const includedQty = (cat === 'mini' ? bundleConfig.mini[item.id] : 
+                                           cat === 'special' ? bundleConfig.special[item.id] : 
+                                           bundleConfig.extras[item.id]) || 0;
+                        
+                        const extraQty = Math.max(0, currentQty - includedQty);
+                        if (extraQty > 0) {
+                            const unitSell = item.sellPrice !== undefined ? item.sellPrice : (item.cost * MULTIPLIER);
+                            extraAddedVal += extraQty * unitSell;
+                        }
+                    });
+                };
+
+                calcExtraItem(data.mini, 'mini');
+                calcExtraItem(data.internals.special, 'special');
+                calcExtraItem(data.extras, 'extra');
+
+                // 3. Cofanetto (Sempre extra se non è 0)
+                const cov = data.covers[state.coverIndex];
+                if(cov.cost > 0) extraAddedVal += (cov.cost * MULTIPLIER);
+
+                // Setta variabili UI
+                finalSellPrice = baseBundlePrice + extraAddedVal;
+                bundleExtraCost = extraAddedVal;
+
+                // Mostra UI Bundle
+                els.bundleBadge.classList.remove('hidden');
+                els.bundleBreakdown.classList.remove('hidden');
+                els.bundleBasePriceDisp.innerText = `€${baseBundlePrice.toFixed(2)}`;
+                els.bundleExtraPriceDisp.innerText = `+€${extraAddedVal.toFixed(2)}`;
+                
+            } else {
+                // Nascondi UI Bundle
+                els.bundleBadge.classList.add('hidden');
+                els.bundleBreakdown.classList.add('hidden');
+            }
+
+            // Update UI
+            els.recapList.innerHTML = recapHTML;
+            els.totalCost.innerText = `€${totalCostStudio.toFixed(2)}`;
+            els.totalSell.innerText = `€${finalSellPrice.toFixed(2)}`;
+        }
+
+        init();
+
+    </script>
+</body>
+</html>
